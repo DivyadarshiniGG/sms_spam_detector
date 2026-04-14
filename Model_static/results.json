@@ -1,0 +1,32 @@
+{
+  "Naive Bayes": {
+    "Accuracy": 95.87,
+    "Precision": 79.01,
+    "Recall": 93.43,
+    "F1-Score": 85.62,
+    "ROC-AUC": 98.69,
+    "CV-F1-Mean": 87.81,
+    "CV-F1-Std": 3.08,
+    "Threshold": 0.55
+  },
+  "SVM": {
+    "Accuracy": 98.18,
+    "Precision": 94.7,
+    "Recall": 91.24,
+    "F1-Score": 92.94,
+    "ROC-AUC": 99.44,
+    "CV-F1-Mean": 91.91,
+    "CV-F1-Std": 2.84,
+    "Threshold": 0.25
+  },
+  "Logistic Regression": {
+    "Accuracy": 98.66,
+    "Precision": 98.43,
+    "Recall": 91.24,
+    "F1-Score": 94.7,
+    "ROC-AUC": 99.53,
+    "CV-F1-Mean": 93.76,
+    "CV-F1-Std": 1.7,
+    "Threshold": 0.55
+  }
+}
