@@ -1,0 +1,594 @@
+{% extends "base.html" %}
+{% block title %}Detect Spam — SpamShield AI{% endblock %}
+
+{% block extra_head %}
+<style>
+  .detect-layout {
+    display              : grid;
+    grid-template-columns: 1fr 1fr;
+    gap                  : 28px;
+    max-width            : 1100px;
+    margin               : 48px auto;
+    padding              : 0 24px;
+    align-items          : start;
+  }
+
+  /* ── Left: Input Panel ─────────────────────────────────── */
+  .input-panel {
+    background   : var(--bg-card);
+    border       : 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding      : 32px;
+    position     : sticky;
+    top          : 88px;
+  }
+
+  .panel-title {
+    font-family  : 'Syne', sans-serif;
+    font-size    : 1.3rem;
+    font-weight  : 700;
+    margin-bottom: 6px;
+  }
+  .panel-sub {
+    font-size    : 0.85rem;
+    color        : var(--text-2);
+    margin-bottom: 24px;
+  }
+
+  .form-group { margin-bottom: 20px; }
+  .form-label {
+    display      : block;
+    font-size    : 0.82rem;
+    font-weight  : 600;
+    color        : var(--text-2);
+    margin-bottom: 8px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .sms-textarea {
+    width       : 100%;
+    height      : 160px;
+    background  : rgba(255,255,255,0.04);
+    border      : 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color       : var(--text-1);
+    font-family : 'DM Sans', sans-serif;
+    font-size   : 0.95rem;
+    padding     : 16px;
+    resize      : vertical;
+    transition  : border-color 0.2s, box-shadow 0.2s;
+    outline     : none;
+    line-height : 1.6;
+  }
+  .sms-textarea:focus {
+    border-color: var(--cyan);
+    box-shadow  : 0 0 0 3px rgba(0,212,255,0.1);
+  }
+  .sms-textarea::placeholder { color: var(--text-3); }
+
+  .char-count {
+    text-align: right;
+    font-size : 0.75rem;
+    color     : var(--text-3);
+    margin-top: 6px;
+  }
+  .char-count.warning { color: var(--warning); }
+
+  /* Model selector */
+  .model-select {
+    width        : 100%;
+    background   : rgba(255,255,255,0.04);
+    border       : 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color        : var(--text-1);
+    font-family  : 'DM Sans', sans-serif;
+    font-size    : 0.92rem;
+    padding      : 12px 16px;
+    cursor       : pointer;
+    outline      : none;
+    transition   : border-color 0.2s;
+    appearance   : none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239999bb' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: calc(100% - 14px) center;
+    padding-right: 40px;
+  }
+  .model-select:focus { border-color: var(--cyan); }
+  .model-select option { background: #1a1a2e; }
+
+  /* Model description chips */
+  .model-chips {
+    display  : flex;
+    gap      : 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .model-chip {
+    font-size    : 0.72rem;
+    padding      : 4px 10px;
+    border-radius: 20px;
+    background   : rgba(255,255,255,0.05);
+    border       : 1px solid var(--border);
+    color        : var(--text-2);
+  }
+
+  /* Language quick sample */
+  .lang-samples {
+    display  : flex;
+    gap      : 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+  .lang-pill {
+    font-size    : 0.73rem;
+    padding      : 5px 12px;
+    border-radius: 20px;
+    background   : var(--bg-card2);
+    border       : 1px solid var(--border);
+    color        : var(--text-2);
+    cursor       : pointer;
+    transition   : all 0.2s;
+  }
+  .lang-pill:hover {
+    border-color: var(--cyan);
+    color       : var(--cyan);
+  }
+
+  .btn-analyse {
+    width          : 100%;
+    display        : flex;
+    align-items    : center;
+    justify-content: center;
+    gap            : 10px;
+    background     : linear-gradient(135deg, var(--cyan), #0077aa);
+    color          : #000;
+    border         : none;
+    border-radius  : var(--radius-md);
+    padding        : 15px;
+    font-family    : 'Syne', sans-serif;
+    font-size      : 1rem;
+    font-weight    : 700;
+    cursor         : pointer;
+    transition     : all 0.25s;
+    margin-top     : 8px;
+    letter-spacing : 0.02em;
+  }
+  .btn-analyse:hover {
+    transform  : translateY(-2px);
+    box-shadow : 0 10px 30px rgba(0,212,255,0.3);
+  }
+  .btn-analyse:disabled {
+    opacity: 0.6;
+    cursor : not-allowed;
+    transform: none;
+  }
+  .spinner {
+    width : 18px;
+    height: 18px;
+    border: 2px solid rgba(0,0,0,0.3);
+    border-top-color: #000;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: none;
+  }
+
+  /* ── Right: Result Panel ───────────────────────────────── */
+  .result-panel { display: flex; flex-direction: column; gap: 20px; }
+
+  /* Empty state */
+  .empty-state {
+    background   : var(--bg-card);
+    border       : 2px dashed var(--border);
+    border-radius: var(--radius-lg);
+    padding      : 64px 32px;
+    text-align   : center;
+    color        : var(--text-3);
+  }
+  .empty-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.5; }
+  .empty-state h3 { font-size: 1.1rem; color: var(--text-2); margin-bottom: 8px; }
+  .empty-state p  { font-size: 0.85rem; }
+
+  /* Result verdict card */
+  .verdict-card {
+    border-radius: var(--radius-lg);
+    padding      : 28px;
+    border       : 1px solid;
+    animation    : fadeUp 0.4s ease;
+  }
+  .verdict-spam {
+    background  : rgba(255,71,87,0.06);
+    border-color: rgba(255,71,87,0.3);
+  }
+  .verdict-ham {
+    background  : rgba(46,213,115,0.06);
+    border-color: rgba(46,213,115,0.3);
+  }
+
+  .verdict-header {
+    display        : flex;
+    justify-content: space-between;
+    align-items    : flex-start;
+    margin-bottom  : 20px;
+  }
+
+  .verdict-label {
+    font-family : 'Syne', sans-serif;
+    font-size   : 2.2rem;
+    font-weight : 800;
+    line-height : 1;
+  }
+  .verdict-spam .verdict-label { color: var(--danger); }
+  .verdict-ham  .verdict-label { color: var(--success); }
+
+  .verdict-risk {
+    font-size    : 0.78rem;
+    font-weight  : 600;
+    margin-top   : 6px;
+    color        : var(--text-2);
+  }
+
+  .conf-display {
+    text-align: right;
+  }
+  .conf-number {
+    font-family : 'Syne', sans-serif;
+    font-size   : 2.4rem;
+    font-weight : 800;
+    color       : var(--cyan);
+    line-height : 1;
+  }
+  .conf-label {
+    font-size: 0.75rem;
+    color    : var(--text-2);
+  }
+
+  /* Probability bars */
+  .prob-row {
+    display       : flex;
+    align-items   : center;
+    gap           : 12px;
+    margin-bottom : 8px;
+    font-size     : 0.82rem;
+  }
+  .prob-label { width: 40px; color: var(--text-2); }
+  .prob-bar-wrap {
+    flex         : 1;
+    height       : 8px;
+    border-radius: 100px;
+    background   : rgba(255,255,255,0.07);
+    overflow     : hidden;
+  }
+  .prob-bar-fill {
+    height       : 100%;
+    border-radius: 100px;
+    transition   : width 1s cubic-bezier(0.23,1,0.32,1);
+  }
+  .bar-spam { background: linear-gradient(90deg, #ff4757, #cc0000); }
+  .bar-ham  { background: linear-gradient(90deg, #2ed573, #1ab360); }
+  .prob-val { width: 42px; text-align: right; font-weight: 600; }
+
+  /* Language info */
+  .info-card {
+    background   : var(--bg-card);
+    border       : 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding      : 20px 24px;
+    animation    : fadeUp 0.45s ease;
+  }
+  .info-card-title {
+    font-size    : 0.72rem;
+    font-weight  : 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color        : var(--text-3);
+    margin-bottom: 14px;
+  }
+  .info-row {
+    display        : flex;
+    justify-content: space-between;
+    align-items    : center;
+    padding        : 8px 0;
+    border-bottom  : 1px solid var(--border);
+    font-size      : 0.87rem;
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-key   { color: var(--text-2); }
+  .info-value { font-weight: 600; }
+
+  /* XAI Card */
+  .xai-card {
+    background   : var(--bg-card);
+    border       : 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding      : 24px;
+    animation    : fadeUp 0.5s ease;
+  }
+  .xai-summary {
+    background   : rgba(255,255,255,0.04);
+    border-radius: var(--radius-md);
+    padding      : 14px;
+    font-size    : 0.88rem;
+    color        : var(--text-1);
+    line-height  : 1.65;
+    margin-bottom: 18px;
+  }
+  .xai-section-label {
+    font-size     : 0.72rem;
+    font-weight   : 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom : 10px;
+  }
+  .word-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .word-chip {
+    padding      : 5px 12px;
+    border-radius: 20px;
+    font-size    : 0.8rem;
+    font-weight  : 600;
+    font-family  : monospace;
+  }
+  .chip-spam { background: rgba(255,71,87,0.15); color: var(--danger);  border: 1px solid rgba(255,71,87,0.3); }
+  .chip-ham  { background: rgba(46,213,115,0.15); color: var(--success); border: 1px solid rgba(46,213,115,0.3); }
+
+  /* Translation box */
+  .translation-box {
+    background   : rgba(0,212,255,0.05);
+    border       : 1px solid rgba(0,212,255,0.15);
+    border-radius: var(--radius-md);
+    padding      : 14px;
+    font-size    : 0.87rem;
+    margin-top   : 12px;
+    line-height  : 1.6;
+  }
+  .translation-box .tl-label {
+    font-size    : 0.7rem;
+    font-weight  : 700;
+    color        : var(--cyan);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  /* Error */
+  .error-box {
+    background   : rgba(255,71,87,0.1);
+    border       : 1px solid rgba(255,71,87,0.3);
+    border-radius: var(--radius-md);
+    padding      : 14px 18px;
+    color        : var(--danger);
+    font-size    : 0.88rem;
+    display      : flex;
+    align-items  : center;
+    gap          : 10px;
+  }
+
+  @media (max-width: 768px) {
+    .detect-layout { grid-template-columns: 1fr; }
+    .input-panel { position: static; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detect-layout">
+
+  <!-- ── LEFT: INPUT ──────────────────────────────────────── -->
+  <div class="input-panel">
+    <div class="panel-title">🔍 Analyse SMS</div>
+    <div class="panel-sub">Enter any message in any language</div>
+
+    {% if error %}
+    <div class="error-box"><i class="fa fa-circle-exclamation"></i> {{ error }}</div>
+    <br>
+    {% endif %}
+
+    <form method="POST" id="detect-form">
+      <div class="form-group">
+        <label class="form-label">SMS Message</label>
+        <textarea
+          name="message"
+          id="sms-input"
+          class="sms-textarea"
+          placeholder="Type or paste any SMS here…&#10;&#10;Supports: English, Tamil, Hindi, Telugu, Tanglish, Hinglish"
+          maxlength="500"
+        >{{ result.original_message if result else (request.args.get('prefill','')) }}</textarea>
+        <div class="char-count" id="char-count">0 / 500 characters</div>
+      </div>
+
+      <!-- Language samples -->
+      <div style="margin-bottom:20px;">
+        <div class="form-label" style="margin-bottom:8px">Try a sample</div>
+        <div class="lang-samples">
+          <span class="lang-pill" onclick="fillSample('Congratulations! You won a FREE iPhone. Claim now at win.com')">🇬🇧 English Spam</span>
+          <span class="lang-pill" onclick="fillSample('நீங்கள் பரிசு வென்றீர்கள்! இப்போது கிளிக் செய்யுங்கள்')">🇮🇳 Tamil</span>
+          <span class="lang-pill" onclick="fillSample('Aapko 50,000 rupees ka prize mila hai! Abhi claim karo')">🇮🇳 Hindi</span>
+          <span class="lang-pill" onclick="fillSample('Hey da, naalai college ku vara poreenga?')">🌀 Tanglish</span>
+          <span class="lang-pill" onclick="fillSample('I will meet you at 5pm at the library today.')">✅ Ham</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">ML Model</label>
+        <select name="model" class="model-select" id="model-select">
+          <option value="Logistic Regression" {% if result and result.model_used=='Logistic Regression' %}selected{% endif %}>
+            Logistic Regression — Best XAI + Confidence</option>
+          <option value="Naive Bayes" {% if result and result.model_used=='Naive Bayes' %}selected{% endif %}>
+            Naive Bayes — Fast Baseline</option>
+          <option value="SVM" {% if result and result.model_used=='SVM' %}selected{% endif %}>
+            SVM (Calibrated) — High Accuracy</option>
+        </select>
+        <div class="model-chips" id="model-desc">
+          <span class="model-chip">📐 LR coefficients → XAI</span>
+          <span class="model-chip">📊 Calibrated probability</span>
+          <span class="model-chip">⚖️ Class-balanced</span>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-analyse" id="analyse-btn">
+        <div class="spinner" id="spinner"></div>
+        <i class="fa fa-bolt" id="btn-icon"></i>
+        <span id="btn-text">Analyse Message</span>
+      </button>
+    </form>
+  </div>
+
+  <!-- ── RIGHT: RESULTS ───────────────────────────────────── -->
+  <div class="result-panel">
+
+    {% if not result %}
+    <div class="empty-state">
+      <div class="empty-icon">🛡️</div>
+      <h3>Ready to analyse</h3>
+      <p>Enter an SMS on the left and click Analyse.<br>Results will appear here instantly.</p>
+    </div>
+
+    {% else %}
+
+    <!-- Verdict -->
+    <div class="verdict-card {{ 'verdict-spam' if result.is_spam else 'verdict-ham' }}">
+      <div class="verdict-header">
+        <div>
+          <div class="verdict-label">{{ result.label }}</div>
+          <div class="verdict-risk">{{ result.risk_label }}</div>
+          <div style="margin-top:12px;">
+            <span class="badge {{ 'badge-spam' if result.is_spam else 'badge-ham' }}">
+              {{ '🚨 Spam Detected' if result.is_spam else '✅ Legitimate Message' }}
+            </span>
+          </div>
+        </div>
+        <div class="conf-display">
+          <div class="conf-number">{{ result.confidence }}%</div>
+          <div class="conf-label">Confidence</div>
+        </div>
+      </div>
+
+      <!-- Probability bars -->
+      <div style="margin-top:8px;">
+        <div class="prob-row">
+          <span class="prob-label" style="color:var(--danger)">SPAM</span>
+          <div class="prob-bar-wrap">
+            <div class="prob-bar-fill bar-spam" style="width:{{ result.spam_prob }}%"></div>
+          </div>
+          <span class="prob-val" style="color:var(--danger)">{{ result.spam_prob }}%</span>
+        </div>
+        <div class="prob-row">
+          <span class="prob-label" style="color:var(--success)">HAM</span>
+          <div class="prob-bar-wrap">
+            <div class="prob-bar-fill bar-ham" style="width:{{ result.ham_prob }}%"></div>
+          </div>
+          <span class="prob-val" style="color:var(--success)">{{ result.ham_prob }}%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info card -->
+    <div class="info-card">
+      <div class="info-card-title">📋 Detection Details</div>
+      <div class="info-row">
+        <span class="info-key">Language Detected</span>
+        <span class="info-value">{{ result.language_name }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">Translation Applied</span>
+        <span class="info-value">{{ '✅ Yes → English' if result.was_translated else '➖ No (English)' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">Model Used</span>
+        <span class="info-value">{{ result.model_used }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">Processing Time</span>
+        <span class="info-value">{{ result.processing_ms }} ms</span>
+      </div>
+      {% if result.was_translated %}
+      <div class="translation-box">
+        <div class="tl-label">🔤 Translated to English</div>
+        {{ result.translated_text }}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- XAI Explanation -->
+    <div class="xai-card">
+      <div class="info-card-title" style="margin-bottom:12px;">🧠 Explainability (XAI)</div>
+      <div class="xai-summary">{{ result.xai.summary }}</div>
+
+      {% if result.xai.spam_triggers %}
+      <div class="xai-section-label" style="color:var(--danger)">⚠️ Spam Trigger Patterns</div>
+      <div class="word-chips" style="margin-bottom:16px;">
+        {% for word, score in result.xai.spam_triggers %}
+        <span class="word-chip chip-spam" title="Score: {{ score }}">{{ word }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if result.xai.safe_signals %}
+      <div class="xai-section-label" style="color:var(--success)">✅ Safe/Normal Patterns</div>
+      <div class="word-chips">
+        {% for word, score in result.xai.safe_signals %}
+        <span class="word-chip chip-ham" title="Score: {{ score }}">{{ word }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Analyse another -->
+    <a href="/detect" class="btn-ghost" style="justify-content:center;">
+      <i class="fa fa-rotate-left"></i> Analyse Another Message
+    </a>
+
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Char counter
+  const textarea  = document.getElementById('sms-input');
+  const charCount = document.getElementById('char-count');
+  function updateCount() {
+    const len = textarea.value.length;
+    charCount.textContent = `${len} / 500 characters`;
+    charCount.className = 'char-count' + (len > 400 ? ' warning' : '');
+  }
+  textarea.addEventListener('input', updateCount);
+  updateCount();
+
+  // Sample filler
+  function fillSample(text) {
+    textarea.value = text;
+    updateCount();
+    textarea.focus();
+  }
+
+  // Pre-fill from URL
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('prefill') && !textarea.value) {
+    textarea.value = params.get('prefill');
+    updateCount();
+  }
+
+  // Spinner on submit
+  document.getElementById('detect-form').addEventListener('submit', function() {
+    if (!textarea.value.trim()) return;
+    document.getElementById('spinner').style.display = 'block';
+    document.getElementById('btn-icon').style.display = 'none';
+    document.getElementById('btn-text').textContent = 'Analysing…';
+    document.getElementById('analyse-btn').disabled = true;
+  });
+
+  // Model description chips
+  const modelDescs = {
+    'Logistic Regression': ['📐 LR coefficients → XAI', '📊 Calibrated probability', '⚖️ Class-balanced'],
+    'Naive Bayes'        : ['⚡ Very fast inference', '📊 Multinomial NB', '🔢 Probabilistic baseline'],
+    'SVM'                : ['🎯 Max-margin classifier', '🔧 Calibrated via Platt', '💪 High precision'],
+  };
+  document.getElementById('model-select').addEventListener('change', function() {
+    const chips = modelDescs[this.value] || [];
+    document.getElementById('model-desc').innerHTML =
+      chips.map(c => `<span class="model-chip">${c}</span>`).join('');
+  });
+</script>
+{% endblock %}

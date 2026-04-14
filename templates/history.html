@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}History — SpamShield AI{% endblock %}
+
+{% block extra_head %}
+<style>
+  .hist-container { max-width: 1000px; margin: 0 auto; padding: 48px 24px; }
+  .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+  .page-header h1 { font-size: 1.8rem; font-weight: 800; }
+
+  .stats-mini { display: flex; gap: 16px; margin-bottom: 32px; }
+  .stat-mini-card {
+    background   : var(--bg-card);
+    border       : 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding      : 16px 24px;
+    text-align   : center;
+    flex         : 1;
+  }
+  .stat-mini-val { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; }
+  .stat-mini-lbl { font-size: 0.75rem; color: var(--text-2); margin-top: 2px; }
+
+  .history-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .history-table th {
+    background : rgba(255,255,255,0.05);
+    padding    : 12px 16px;
+    text-align : left;
+    font-size  : 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color      : var(--text-2);
+    border-bottom: 1px solid var(--border);
+  }
+  .history-table td {
+    padding    : 14px 16px;
+    font-size  : 0.88rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    background : var(--bg-card);
+    vertical-align: middle;
+  }
+  .history-table tr:hover td { background: var(--bg-card2); }
+  .history-table tr:last-child td { border-bottom: none; }
+
+  .risk-dot {
+    width         : 10px;
+    height        : 10px;
+    border-radius : 50%;
+    display       : inline-block;
+    margin-right  : 6px;
+  }
+  .dot-critical, .dot-high   { background: var(--danger); }
+  .dot-medium                { background: var(--warning); }
+  .dot-safe, .dot-likely_safe{ background: var(--success); }
+
+  .empty-hist {
+    text-align   : center;
+    padding      : 80px 24px;
+    color        : var(--text-3);
+    border       : 2px dashed var(--border);
+    border-radius: var(--radius-lg);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hist-container">
+  <div class="page-header">
+    <div>
+      <h1>📋 Prediction History</h1>
+      <p style="color:var(--text-2); margin-top:6px; font-size:0.9rem">Your last 25 analysed messages this session</p>
+    </div>
+    {% if history %}
+    <a href="/clear_history" class="btn-ghost" style="color:var(--danger); border-color:rgba(255,71,87,0.3);">
+      <i class="fa fa-trash"></i> Clear History
+    </a>
+    {% endif %}
+  </div>
+
+  {% if history %}
+  <div class="stats-mini">
+    <div class="stat-mini-card">
+      <div class="stat-mini-val">{{ history|length }}</div>
+      <div class="stat-mini-lbl">Total Analysed</div>
+    </div>
+    <div class="stat-mini-card">
+      <div class="stat-mini-val" style="color:var(--danger)">{{ spam_count }}</div>
+      <div class="stat-mini-lbl">Spam Found</div>
+    </div>
+    <div class="stat-mini-card">
+      <div class="stat-mini-val" style="color:var(--success)">{{ ham_count }}</div>
+      <div class="stat-mini-lbl">Ham (Legit)</div>
+    </div>
+    <div class="stat-mini-card">
+      <div class="stat-mini-val" style="color:var(--cyan)">
+        {{ ((spam_count / history|length) * 100) | round(0) | int }}%
+      </div>
+      <div class="stat-mini-lbl">Spam Rate</div>
+    </div>
+  </div>
+
+  <table class="history-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Message</th>
+        <th>Result</th>
+        <th>Confidence</th>
+        <th>Model</th>
+        <th>Language</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for h in history %}
+      <tr>
+        <td style="color:var(--text-3)">{{ loop.index }}</td>
+        <td style="max-width:280px; color:var(--text-2)">{{ h.message }}</td>
+        <td>
+          <span class="badge {{ 'badge-spam' if h.label == 'SPAM' else 'badge-ham' }}">
+            {{ '🚨 SPAM' if h.label == 'SPAM' else '✅ HAM' }}
+          </span>
+        </td>
+        <td>
+          <span class="risk-dot dot-{{ h.risk_class }}"></span>
+          {{ h.confidence }}%
+        </td>
+        <td style="color:var(--text-2); font-size:0.82rem">{{ h.model }}</td>
+        <td style="font-size:0.82rem">{{ h.language }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% else %}
+  <div class="empty-hist">
+    <div style="font-size:3rem; margin-bottom:16px">📭</div>
+    <h3 style="color:var(--text-2); margin-bottom:8px">No history yet</h3>
+    <p>Analyse some messages first.</p>
+    <br>
+    <a href="/detect" class="btn-primary" style="display:inline-flex;">
+      <i class="fa fa-magnifying-glass"></i> Start Detecting
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

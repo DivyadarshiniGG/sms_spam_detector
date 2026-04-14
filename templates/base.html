@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}SpamShield AI{% endblock %}</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <style>
+    /* ── CSS Reset & Variables ─────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-deep    : #060612;
+      --bg-card    : rgba(255,255,255,0.04);
+      --bg-card2   : rgba(255,255,255,0.07);
+      --border     : rgba(255,255,255,0.09);
+      --border-glow: rgba(0,212,255,0.35);
+      --cyan       : #00d4ff;
+      --cyan-dim   : rgba(0,212,255,0.15);
+      --pink       : #ff6b9d;
+      --lime       : #c3f73a;
+      --text-1     : #f0f0ff;
+      --text-2     : #9999bb;
+      --text-3     : #5a5a7a;
+      --danger     : #ff4757;
+      --success    : #2ed573;
+      --warning    : #ffa502;
+      --radius-lg  : 20px;
+      --radius-md  : 12px;
+      --shadow     : 0 8px 32px rgba(0,0,0,0.5);
+      --shadow-glow: 0 0 40px rgba(0,212,255,0.12);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background : var(--bg-deep);
+      color      : var(--text-1);
+      min-height : 100vh;
+      overflow-x : hidden;
+    }
+
+    /* Grid background texture */
+    body::before {
+      content : '';
+      position: fixed;
+      inset    : 0;
+      background-image:
+        linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index  : 0;
+    }
+
+    /* Ambient glow blobs */
+    body::after {
+      content   : '';
+      position  : fixed;
+      top       : -200px;
+      right     : -200px;
+      width     : 600px;
+      height    : 600px;
+      background: radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%);
+      pointer-events: none;
+      z-index   : 0;
+    }
+
+    /* ── Navigation ────────────────────────────────────────── */
+    .navbar {
+      position        : sticky;
+      top             : 0;
+      z-index         : 100;
+      display         : flex;
+      align-items     : center;
+      justify-content : space-between;
+      padding         : 0 48px;
+      height          : 64px;
+      background      : rgba(6,6,18,0.85);
+      backdrop-filter : blur(20px);
+      border-bottom   : 1px solid var(--border);
+    }
+
+    .nav-brand {
+      display    : flex;
+      align-items: center;
+      gap        : 10px;
+      text-decoration: none;
+    }
+    .nav-brand .logo-icon {
+      width          : 36px;
+      height         : 36px;
+      background     : linear-gradient(135deg, var(--cyan), #0077aa);
+      border-radius  : 10px;
+      display        : flex;
+      align-items    : center;
+      justify-content: center;
+      font-size      : 18px;
+      box-shadow     : 0 0 16px rgba(0,212,255,0.4);
+    }
+    .nav-brand span {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size  : 1.15rem;
+      color      : var(--text-1);
+      letter-spacing: 0.02em;
+    }
+    .nav-brand span em { color: var(--cyan); font-style: normal; }
+
+    .nav-links {
+      display   : flex;
+      align-items: center;
+      gap       : 4px;
+      list-style: none;
+    }
+    .nav-links a {
+      display        : flex;
+      align-items    : center;
+      gap            : 6px;
+      padding        : 8px 14px;
+      border-radius  : 8px;
+      text-decoration: none;
+      color          : var(--text-2);
+      font-size      : 0.88rem;
+      font-weight    : 500;
+      transition     : all 0.2s;
+    }
+    .nav-links a:hover,
+    .nav-links a.active {
+      background: var(--bg-card2);
+      color     : var(--text-1);
+    }
+    .nav-links a.active { color: var(--cyan); }
+
+    .nav-badge {
+      background   : var(--cyan);
+      color        : #000;
+      font-size    : 0.65rem;
+      font-weight  : 700;
+      padding      : 2px 6px;
+      border-radius: 20px;
+    }
+
+    /* ── Page wrapper ──────────────────────────────────────── */
+    .page-wrapper {
+      position  : relative;
+      z-index   : 1;
+      min-height: calc(100vh - 64px);
+    }
+
+    /* ── Cards ─────────────────────────────────────────────── */
+    .card {
+      background   : var(--bg-card);
+      border       : 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding      : 28px;
+      transition   : border-color 0.3s;
+    }
+    .card:hover { border-color: var(--border-glow); }
+
+    .card-glow {
+      background   : var(--bg-card);
+      border       : 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding      : 28px;
+      box-shadow   : var(--shadow-glow);
+    }
+
+    /* ── Buttons ───────────────────────────────────────────── */
+    .btn-primary {
+      display        : inline-flex;
+      align-items    : center;
+      gap            : 8px;
+      background     : linear-gradient(135deg, var(--cyan) 0%, #0099cc 100%);
+      color          : #000;
+      border         : none;
+      border-radius  : 50px;
+      padding        : 13px 30px;
+      font-family    : 'DM Sans', sans-serif;
+      font-size      : 0.95rem;
+      font-weight    : 600;
+      cursor         : pointer;
+      transition     : all 0.25s;
+      text-decoration: none;
+      letter-spacing : 0.01em;
+    }
+    .btn-primary:hover {
+      transform : translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,212,255,0.35);
+    }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-ghost {
+      display        : inline-flex;
+      align-items    : center;
+      gap            : 8px;
+      background     : transparent;
+      color          : var(--text-2);
+      border         : 1px solid var(--border);
+      border-radius  : 50px;
+      padding        : 11px 24px;
+      font-size      : 0.88rem;
+      cursor         : pointer;
+      transition     : all 0.2s;
+      text-decoration: none;
+    }
+    .btn-ghost:hover {
+      border-color: var(--cyan);
+      color       : var(--cyan);
+    }
+
+    /* ── Typography ────────────────────────────────────────── */
+    h1, h2, h3, h4 { font-family: 'Syne', sans-serif; line-height: 1.2; }
+    .text-cyan   { color: var(--cyan); }
+    .text-pink   { color: var(--pink); }
+    .text-lime   { color: var(--lime); }
+    .text-muted  { color: var(--text-2); }
+    .text-faint  { color: var(--text-3); }
+
+    /* ── Badges ────────────────────────────────────────────── */
+    .badge {
+      display      : inline-flex;
+      align-items  : center;
+      gap          : 4px;
+      padding      : 4px 10px;
+      border-radius: 20px;
+      font-size    : 0.75rem;
+      font-weight  : 600;
+      letter-spacing: 0.03em;
+    }
+    .badge-spam    { background: rgba(255,71,87,0.15);  color: var(--danger);  border: 1px solid rgba(255,71,87,0.3); }
+    .badge-ham     { background: rgba(46,213,115,0.15); color: var(--success); border: 1px solid rgba(46,213,115,0.3); }
+    .badge-cyan    { background: var(--cyan-dim);       color: var(--cyan);    border: 1px solid rgba(0,212,255,0.25); }
+    .badge-warning { background: rgba(255,165,2,0.15);  color: var(--warning); border: 1px solid rgba(255,165,2,0.3); }
+
+    /* ── Progress / Confidence Bar ─────────────────────────── */
+    .conf-bar-wrap {
+      background   : rgba(255,255,255,0.07);
+      border-radius: 100px;
+      height       : 8px;
+      overflow     : hidden;
+    }
+    .conf-bar-fill {
+      height        : 100%;
+      border-radius : 100px;
+      background    : linear-gradient(90deg, var(--cyan), #0077aa);
+      transition    : width 1s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .conf-bar-fill.danger {
+      background: linear-gradient(90deg, var(--danger), #cc0000);
+    }
+
+    /* ── Scrollbar ─────────────────────────────────────────── */
+    ::-webkit-scrollbar       { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-deep); }
+    ::-webkit-scrollbar-thumb { background: #2a2a3a; border-radius: 10px; }
+
+    /* ── Animations ────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse-glow {
+      0%,100% { box-shadow: 0 0 20px rgba(0,212,255,0.2); }
+      50%      { box-shadow: 0 0 40px rgba(0,212,255,0.45); }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .fade-up { animation: fadeUp 0.5s ease forwards; }
+
+    /* ── Divider ───────────────────────────────────────────── */
+    .divider {
+      border    : none;
+      border-top: 1px solid var(--border);
+      margin    : 24px 0;
+    }
+
+    /* ── Footer ────────────────────────────────────────────── */
+    footer {
+      text-align : center;
+      padding    : 32px;
+      color      : var(--text-3);
+      font-size  : 0.82rem;
+      border-top : 1px solid var(--border);
+      position   : relative;
+      z-index    : 1;
+    }
+    footer a { color: var(--cyan); text-decoration: none; }
+  </style>
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<!-- ── NAVBAR ──────────────────────────────────────────────────── -->
+<nav class="navbar">
+  <a href="/" class="nav-brand">
+    <div class="logo-icon">🛡️</div>
+    <span>Spam<em>Shield</em> AI</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="/"            class="{% if request.endpoint=='index'       %}active{% endif %}"><i class="fa fa-house"></i> Home</a></li>
+    <li><a href="/detect"      class="{% if request.endpoint=='detect_page' %}active{% endif %}"><i class="fa fa-magnifying-glass"></i> Detect</a></li>
+    <li><a href="/performance" class="{% if request.endpoint=='performance' %}active{% endif %}"><i class="fa fa-chart-bar"></i> Performance</a></li>
+    <li><a href="/history"     class="{% if request.endpoint=='history'     %}active{% endif %}"><i class="fa fa-clock-rotate-left"></i> History</a></li>
+    <li><a href="/about"       class="{% if request.endpoint=='about'       %}active{% endif %}"><i class="fa fa-circle-info"></i> About</a></li>
+  </ul>
+</nav>
+
+<!-- ── PAGE CONTENT ───────────────────────────────────────────── -->
+<div class="page-wrapper">
+  {% block content %}{% endblock %}
+</div>
+
+<footer>
+  Built with 🧠 Machine Learning · SpamShield AI &copy; 2024 ·
+  <a href="/about">Learn how it works</a>
+</footer>
+
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

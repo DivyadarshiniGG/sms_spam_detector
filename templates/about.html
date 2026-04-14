@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% block title %}About — SpamShield AI{% endblock %}
+
+{% block extra_head %}
+<style>
+  .about-container { max-width: 900px; margin: 0 auto; padding: 48px 24px; }
+
+  .about-hero {
+    background     : var(--bg-card);
+    border         : 1px solid var(--border);
+    border-radius  : var(--radius-lg);
+    padding        : 40px;
+    margin-bottom  : 32px;
+    text-align     : center;
+  }
+  .about-hero h1 { font-size: 1.9rem; font-weight: 800; margin-bottom: 12px; }
+  .about-hero p  { color: var(--text-2); max-width: 600px; margin: 0 auto; line-height: 1.7; }
+
+  .novelty-list { display: flex; flex-direction: column; gap: 16px; margin-bottom: 40px; }
+  .novelty-item {
+    display      : flex;
+    gap          : 20px;
+    align-items  : flex-start;
+    background   : var(--bg-card);
+    border       : 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding      : 24px;
+    transition   : border-color 0.3s;
+  }
+  .novelty-item:hover { border-color: var(--border-glow); }
+  .novelty-num {
+    width          : 42px;
+    height         : 42px;
+    border-radius  : 12px;
+    background     : var(--cyan-dim);
+    border         : 1px solid rgba(0,212,255,0.2);
+    display        : flex;
+    align-items    : center;
+    justify-content: center;
+    font-family    : 'Syne', sans-serif;
+    font-weight    : 800;
+    font-size      : 1rem;
+    color          : var(--cyan);
+    flex-shrink    : 0;
+  }
+  .novelty-content h3 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+  .novelty-content p  { font-size: 0.87rem; color: var(--text-2); line-height: 1.65; }
+
+  .tech-stack {
+    display              : grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap                  : 14px;
+    margin-bottom        : 40px;
+  }
+  .tech-item {
+    background   : var(--bg-card);
+    border       : 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding      : 16px;
+    display      : flex;
+    align-items  : center;
+    gap          : 12px;
+    font-size    : 0.88rem;
+  }
+  .tech-icon {
+    font-size : 1.5rem;
+    flex-shrink: 0;
+  }
+  .tech-name  { font-weight: 600; }
+  .tech-desc  { font-size: 0.75rem; color: var(--text-2); }
+
+  .section-heading {
+    font-family  : 'Syne', sans-serif;
+    font-size    : 1.15rem;
+    font-weight  : 700;
+    margin-bottom: 20px;
+    display      : flex;
+    align-items  : center;
+    gap          : 10px;
+  }
+
+  .comparison-table {
+    width          : 100%;
+    border-collapse: separate;
+    border-spacing : 0;
+    border-radius  : var(--radius-lg);
+    overflow       : hidden;
+    margin-bottom  : 40px;
+  }
+  .comparison-table th {
+    background  : rgba(255,255,255,0.06);
+    padding     : 12px 18px;
+    font-size   : 0.78rem;
+    font-weight : 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color       : var(--text-2);
+    border-bottom: 1px solid var(--border);
+  }
+  .comparison-table td {
+    padding   : 12px 18px;
+    font-size : 0.88rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-card);
+  }
+  .comparison-table tr:last-child td { border-bottom: none; }
+  .yes  { color: var(--success); font-weight: 700; }
+  .no   { color: var(--danger);  font-weight: 700; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="about-container">
+
+  <div class="about-hero">
+    <div class="badge badge-cyan" style="margin-bottom:16px">MCA Final Project</div>
+    <h1>Explainable Multilingual SMS Spam Detection</h1>
+    <p>
+      Using Machine Learning with Confidence Scoring and Translation-Based Support —
+      a practical, interpretable, and multilingual spam detection system that goes far beyond
+      existing English-only binary classifiers.
+    </p>
+  </div>
+
+  <!-- Novelties -->
+  <div class="section-heading"><i class="fa fa-star"></i> 5 Research Novelties</div>
+  <div class="novelty-list">
+    <div class="novelty-item">
+      <div class="novelty-num">1</div>
+      <div class="novelty-content">
+        <h3>Explainable AI (XAI) — Not a Black Box</h3>
+        <p>Most classifiers give only SPAM/HAM. SpamShield uses <strong>Logistic Regression coefficients</strong>
+        to pinpoint exactly which words and patterns triggered the classification. This improves
+        user trust, transparency, and is rare in student-level projects.</p>
+      </div>
+    </div>
+    <div class="novelty-item">
+      <div class="novelty-num">2</div>
+      <div class="novelty-content">
+        <h3>Multilingual + Mixed-Language Support</h3>
+        <p>Supports English, Tamil, Hindi, Telugu, Tanglish, Hinglish and 7+ languages via
+        automatic language detection (<code>langdetect</code>) and translation (<code>googletrans</code>).
+        Makes the system practically useful for Indian users — a major gap in existing work.</p>
+      </div>
+    </div>
+    <div class="novelty-item">
+      <div class="novelty-num">3</div>
+      <div class="novelty-content">
+        <h3>Calibrated Confidence Scoring with Risk Levels</h3>
+        <p>Instead of a binary output, users receive a precise probability score (e.g. 94.3%)
+        and a risk tier (Critical / High / Medium / Safe). SVM is wrapped in
+        <code>CalibratedClassifierCV</code> to produce true probability estimates.</p>
+      </div>
+    </div>
+    <div class="novelty-item">
+      <div class="novelty-num">4</div>
+      <div class="novelty-content">
+        <h3>Dual TF-IDF + Statistical Meta-Features</h3>
+        <p>Combines <strong>character n-grams</strong> (captures Tanglish/Hinglish patterns),
+        <strong>word n-grams</strong> (captures phrase-level spam), and <strong>10 statistical
+        meta-features</strong> (message length, caps ratio, URL presence, currency symbols, etc.)
+        — a richer representation than any single vectoriser.</p>
+      </div>
+    </div>
+    <div class="novelty-item">
+      <div class="novelty-num">5</div>
+      <div class="novelty-content">
+        <h3>Complete Web System with Prediction History</h3>
+        <p>A production-grade Flask application with 5 pages, real-time prediction, language detection,
+        session-based history tracking, and visual performance dashboards — not just a Jupyter notebook.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- vs Base Paper -->
+  <div class="section-heading"><i class="fa fa-code-compare"></i> My Project vs Base Paper</div>
+  <table class="comparison-table">
+    <thead>
+      <tr><th>Feature</th><th>Base Paper (Lakshman et al.)</th><th>SpamShield AI (My Project)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Language Support</td><td class="no">English Only</td><td class="yes">7+ Languages + Tanglish</td></tr>
+      <tr><td>Output Type</td><td class="no">Binary (Spam/Ham)</td><td class="yes">Label + Confidence + Risk Level</td></tr>
+      <tr><td>Explainability</td><td class="no">None</td><td class="yes">XAI — word-level explanation</td></tr>
+      <tr><td>Feature Engineering</td><td class="no">Word TF-IDF only</td><td class="yes">Char + Word TF-IDF + 10 meta-features</td></tr>
+      <tr><td>User Interface</td><td class="no">No UI</td><td class="yes">5-page professional web app</td></tr>
+      <tr><td>Model Evaluation</td><td class="no">Accuracy only</td><td class="yes">Accuracy + Precision + Recall + F1 + AUC + CV</td></tr>
+      <tr><td>Cross-Validation</td><td class="no">No</td><td class="yes">5-fold CV for all models</td></tr>
+      <tr><td>Deployment</td><td class="no">Offline script</td><td class="yes">Flask web app (real-time)</td></tr>
+    </tbody>
+  </table>
+
+  <!-- Tech Stack -->
+  <div class="section-heading"><i class="fa fa-layer-group"></i> Technology Stack</div>
+  <div class="tech-stack">
+    <div class="tech-item"><span class="tech-icon">🐍</span><div><div class="tech-name">Python 3.10</div><div class="tech-desc">Core language</div></div></div>
+    <div class="tech-item"><span class="tech-icon">🤖</span><div><div class="tech-name">scikit-learn</div><div class="tech-desc">ML models + evaluation</div></div></div>
+    <div class="tech-item"><span class="tech-icon">🌶️</span><div><div class="tech-name">Flask</div><div class="tech-desc">Web framework</div></div></div>
+    <div class="tech-item"><span class="tech-icon">📊</span><div><div class="tech-name">Matplotlib / Seaborn</div><div class="tech-desc">Charts & heatmaps</div></div></div>
+    <div class="tech-item"><span class="tech-icon">🌐</span><div><div class="tech-name">googletrans</div><div class="tech-desc">Translation API</div></div></div>
+    <div class="tech-item"><span class="tech-icon">🔍</span><div><div class="tech-name">langdetect</div><div class="tech-desc">Language identification</div></div></div>
+    <div class="tech-item"><span class="tech-icon">📝</span><div><div class="tech-name">NLTK</div><div class="tech-desc">Stop-word removal</div></div></div>
+    <div class="tech-item"><span class="tech-icon">🔢</span><div><div class="tech-name">NumPy / Pandas</div><div class="tech-desc">Data processing</div></div></div>
+  </div>
+
+</div>
+{% endblock %}

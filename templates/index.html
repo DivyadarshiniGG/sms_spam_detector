@@ -1,0 +1,465 @@
+{% extends "base.html" %}
+{% block title %}SpamShield AI — Multilingual SMS Spam Detection{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* Hero Section */
+  .hero {
+    display        : flex;
+    flex-direction : column;
+    align-items    : center;
+    justify-content: center;
+    text-align     : center;
+    padding        : 96px 24px 64px;
+    position       : relative;
+  }
+
+  .hero-eyebrow {
+    display      : inline-flex;
+    align-items  : center;
+    gap          : 8px;
+    background   : rgba(0,212,255,0.08);
+    border       : 1px solid rgba(0,212,255,0.2);
+    color        : var(--cyan);
+    font-size    : 0.78rem;
+    font-weight  : 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding      : 6px 16px;
+    border-radius: 100px;
+    margin-bottom: 28px;
+    animation    : fadeUp 0.4s ease forwards;
+  }
+
+  .hero h1 {
+    font-size  : clamp(2.4rem, 6vw, 4.2rem);
+    font-weight: 800;
+    line-height: 1.1;
+    max-width  : 800px;
+    margin-bottom: 24px;
+    animation  : fadeUp 0.5s 0.1s ease both;
+  }
+  .hero h1 .gradient-text {
+    background             : linear-gradient(135deg, var(--cyan) 0%, var(--pink) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip        : text;
+  }
+
+  .hero-sub {
+    max-width    : 580px;
+    color        : var(--text-2);
+    font-size    : 1.08rem;
+    line-height  : 1.7;
+    margin-bottom: 44px;
+    animation    : fadeUp 0.5s 0.2s ease both;
+  }
+
+  .hero-cta {
+    display    : flex;
+    gap        : 14px;
+    flex-wrap  : wrap;
+    justify-content: center;
+    animation  : fadeUp 0.5s 0.3s ease both;
+    margin-bottom: 80px;
+  }
+
+  /* Stats row */
+  .stats-row {
+    display        : flex;
+    justify-content: center;
+    gap            : 0;
+    border         : 1px solid var(--border);
+    border-radius  : var(--radius-lg);
+    overflow       : hidden;
+    max-width      : 700px;
+    width          : 100%;
+    margin         : 0 auto 80px;
+    animation      : fadeUp 0.5s 0.4s ease both;
+  }
+  .stat-item {
+    flex          : 1;
+    padding       : 24px 16px;
+    text-align    : center;
+    border-right  : 1px solid var(--border);
+    background    : var(--bg-card);
+    transition    : background 0.2s;
+  }
+  .stat-item:last-child { border-right: none; }
+  .stat-item:hover { background: var(--bg-card2); }
+  .stat-value {
+    font-family : 'Syne', sans-serif;
+    font-size   : 2rem;
+    font-weight : 800;
+    color       : var(--cyan);
+    display     : block;
+  }
+  .stat-label {
+    font-size: 0.78rem;
+    color    : var(--text-2);
+    margin-top: 4px;
+  }
+
+  /* Feature grid */
+  .section-label {
+    text-align  : center;
+    font-family : 'Syne', sans-serif;
+    font-size   : 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color       : var(--cyan);
+    margin-bottom: 16px;
+  }
+  .section-title {
+    text-align : center;
+    font-size  : clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 700;
+    margin-bottom: 48px;
+  }
+
+  .features-grid {
+    display              : grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap                  : 20px;
+    max-width            : 1100px;
+    margin               : 0 auto;
+    padding              : 0 24px;
+  }
+
+  .feature-card {
+    background   : var(--bg-card);
+    border       : 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding      : 28px;
+    transition   : all 0.3s;
+    position     : relative;
+    overflow     : hidden;
+  }
+  .feature-card::before {
+    content   : '';
+    position  : absolute;
+    top       : 0; left: 0; right: 0;
+    height    : 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    opacity   : 0;
+    transition: opacity 0.3s;
+  }
+  .feature-card:hover {
+    border-color: var(--border-glow);
+    transform   : translateY(-4px);
+    box-shadow  : 0 12px 40px rgba(0,0,0,0.4);
+  }
+  .feature-card:hover::before { opacity: 1; }
+
+  .feature-icon {
+    width          : 52px;
+    height         : 52px;
+    border-radius  : 14px;
+    display        : flex;
+    align-items    : center;
+    justify-content: center;
+    font-size      : 24px;
+    margin-bottom  : 18px;
+  }
+  .icon-cyan  { background: rgba(0,212,255,0.12);  border: 1px solid rgba(0,212,255,0.2); }
+  .icon-pink  { background: rgba(255,107,157,0.12); border: 1px solid rgba(255,107,157,0.2); }
+  .icon-lime  { background: rgba(195,247,58,0.12);  border: 1px solid rgba(195,247,58,0.2); }
+  .icon-warn  { background: rgba(255,165,2,0.12);   border: 1px solid rgba(255,165,2,0.2); }
+  .icon-purp  { background: rgba(162,155,254,0.12); border: 1px solid rgba(162,155,254,0.2); }
+
+  .feature-card h3 {
+    font-size    : 1.05rem;
+    font-weight  : 700;
+    margin-bottom: 10px;
+  }
+  .feature-card p {
+    font-size  : 0.88rem;
+    color      : var(--text-2);
+    line-height: 1.65;
+  }
+  .feature-tag {
+    display      : inline-block;
+    margin-top   : 14px;
+    font-size    : 0.72rem;
+    color        : var(--cyan);
+    background   : var(--cyan-dim);
+    padding      : 3px 10px;
+    border-radius: 20px;
+    font-weight  : 600;
+    letter-spacing: 0.04em;
+  }
+
+  /* Pipeline section */
+  .pipeline-section {
+    max-width : 900px;
+    margin    : 80px auto;
+    padding   : 0 24px;
+  }
+  .pipeline-steps {
+    display  : flex;
+    gap      : 0;
+    position : relative;
+    margin-top: 32px;
+  }
+  .pipeline-steps::before {
+    content   : '';
+    position  : absolute;
+    top       : 28px;
+    left      : 28px;
+    right     : 28px;
+    height    : 2px;
+    background: linear-gradient(90deg, var(--cyan), var(--pink));
+    z-index   : 0;
+  }
+  .pipeline-step {
+    flex      : 1;
+    text-align: center;
+    position  : relative;
+    z-index   : 1;
+    padding   : 0 12px;
+  }
+  .step-circle {
+    width          : 56px;
+    height         : 56px;
+    border-radius  : 50%;
+    background     : var(--bg-deep);
+    border         : 2px solid var(--cyan);
+    display        : flex;
+    align-items    : center;
+    justify-content: center;
+    font-size      : 22px;
+    margin         : 0 auto 12px;
+    box-shadow     : 0 0 20px rgba(0,212,255,0.25);
+  }
+  .step-title { font-size: 0.82rem; font-weight: 600; color: var(--text-1); }
+  .step-desc  { font-size: 0.72rem; color: var(--text-2); margin-top: 4px; }
+
+  /* Demo section */
+  .demo-section {
+    max-width   : 1000px;
+    margin      : 0 auto 80px;
+    padding     : 0 24px;
+  }
+  .demo-card {
+    background     : var(--bg-card);
+    border         : 1px solid var(--border);
+    border-radius  : var(--radius-lg);
+    padding        : 32px;
+    display        : grid;
+    grid-template-columns: 1fr 1fr;
+    gap            : 32px;
+    align-items    : start;
+  }
+  .demo-msg {
+    background   : rgba(255,71,87,0.07);
+    border       : 1px solid rgba(255,71,87,0.2);
+    border-radius: 12px;
+    padding      : 16px;
+    font-size    : 0.9rem;
+    color        : var(--text-1);
+    font-style   : italic;
+    line-height  : 1.6;
+    cursor       : pointer;
+    transition   : all 0.2s;
+  }
+  .demo-msg:hover { border-color: rgba(255,71,87,0.5); background: rgba(255,71,87,0.12); }
+  .demo-msg.ham {
+    background: rgba(46,213,115,0.07);
+    border-color: rgba(46,213,115,0.2);
+  }
+  .demo-msg.ham:hover { border-color: rgba(46,213,115,0.5); background: rgba(46,213,115,0.12); }
+  .demo-msg-label {
+    font-size    : 0.7rem;
+    font-weight  : 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  @media (max-width: 768px) {
+    .demo-card { grid-template-columns: 1fr; }
+    .pipeline-steps { flex-direction: column; gap: 16px; }
+    .pipeline-steps::before { display: none; }
+    .stats-row { flex-wrap: wrap; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── HERO ─────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-eyebrow">
+    <i class="fa fa-shield-halved"></i>
+    AI-Powered SMS Protection
+  </div>
+
+  <h1>
+    Detect Spam in<br>
+    <span class="gradient-text">Any Language, Instantly</span>
+  </h1>
+
+  <p class="hero-sub">
+    SpamShield AI uses Explainable Machine Learning to identify spam SMS
+    in English, Tamil, Hindi and mixed languages — with confidence scores
+    and transparent reasoning you can trust.
+  </p>
+
+  <div class="hero-cta">
+    <a href="/detect" class="btn-primary">
+      <i class="fa fa-magnifying-glass"></i> Analyse a Message
+    </a>
+    <a href="/performance" class="btn-ghost">
+      <i class="fa fa-chart-line"></i> View Model Performance
+    </a>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-item">
+      <span class="stat-value">{{ best_acc }}%</span>
+      <div class="stat-label">Best Accuracy</div>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value">5,572</span>
+      <div class="stat-label">SMS Trained On</div>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value">3</span>
+      <div class="stat-label">ML Models</div>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value">7+</span>
+      <div class="stat-label">Languages</div>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value">&lt;100ms</span>
+      <div class="stat-label">Response Time</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURES ─────────────────────────────────────────────────── -->
+<section style="padding: 0 0 80px; max-width: 1100px; margin: 0 auto;">
+  <div class="section-label">What makes this different</div>
+  <h2 class="section-title">5 Novelties vs Existing Projects</h2>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon icon-cyan">🧠</div>
+      <h3>Explainable AI (XAI)</h3>
+      <p>Unlike black-box spam filters, SpamShield shows you <em>exactly</em> which words and patterns triggered the spam classification using Logistic Regression coefficients.</p>
+      <span class="feature-tag">Novel #1</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon icon-pink">🌐</div>
+      <h3>Multilingual Detection</h3>
+      <p>Auto-detects Tamil, Hindi, Telugu, Malayalam and 7+ languages. Translates to English internally, then runs the ML pipeline — fully transparent to you.</p>
+      <span class="feature-tag">Novel #2</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon icon-lime">📊</div>
+      <h3>Confidence Scoring</h3>
+      <p>Not just SPAM or HAM. Get a precise probability score (e.g. 94.3% spam) with a visual risk meter — critical, high, medium or safe.</p>
+      <span class="feature-tag">Novel #3</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon icon-warn">⚙️</div>
+      <h3>Dual TF-IDF Architecture</h3>
+      <p>Combines character n-grams (handles Tanglish/Hinglish) with word n-grams (captures phrase patterns) — plus 10 statistical meta-features per message.</p>
+      <span class="feature-tag">Novel #4</span>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon icon-purp">⚖️</div>
+      <h3>3-Model Comparison</h3>
+      <p>Naive Bayes, SVM, and Logistic Regression are all trained and compared with Accuracy, Precision, Recall, F1-Score, ROC-AUC and Cross-Validation.</p>
+      <span class="feature-tag">Novel #5</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── PIPELINE ──────────────────────────────────────────────────── -->
+<section class="pipeline-section">
+  <div class="section-label">How it works</div>
+  <h2 class="section-title" style="text-align:center;">6-Stage Detection Pipeline</h2>
+
+  <div class="pipeline-steps">
+    <div class="pipeline-step">
+      <div class="step-circle">📩</div>
+      <div class="step-title">Input</div>
+      <div class="step-desc">Any SMS text</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-circle">🌐</div>
+      <div class="step-title">Lang Detect</div>
+      <div class="step-desc">langdetect</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-circle">🔤</div>
+      <div class="step-title">Translate</div>
+      <div class="step-desc">→ English</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-circle">🧹</div>
+      <div class="step-title">Clean &amp; TF-IDF</div>
+      <div class="step-desc">char + word</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-circle">🤖</div>
+      <div class="step-title">ML Predict</div>
+      <div class="step-desc">NB / SVM / LR</div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-circle">💡</div>
+      <div class="step-title">XAI Explain</div>
+      <div class="step-desc">Confidence + why</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── DEMO MESSAGES ─────────────────────────────────────────────── -->
+<section class="demo-section">
+  <div class="section-label">Try these examples</div>
+  <h2 class="section-title" style="text-align:center;">Click a message to detect it</h2>
+
+  <div class="demo-card">
+    <div>
+      <div class="demo-msg-label" style="color:var(--danger)">🔴 Spam Examples</div>
+      <div class="demo-msg" onclick="tryMessage(this.dataset.msg)" data-msg="CONGRATULATIONS! You have won a £1,000 Tesco gift card. Click here to claim now!">
+        "CONGRATULATIONS! You have won a £1,000 Tesco gift card. Click here to claim now!"
+      </div>
+      <br>
+      <div class="demo-msg" onclick="tryMessage(this.dataset.msg)" data-msg="நீங்கள் ஒரு பரிசு வென்றீர்கள்! இப்போது கிளிக் செய்யுங்கள்">
+        "நீங்கள் ஒரு பரிசு வென்றீர்கள்! இப்போது கிளிக் செய்யுங்கள்" <span class="badge badge-cyan" style="font-size:0.68rem">Tamil</span>
+      </div>
+      <br>
+      <div class="demo-msg" onclick="tryMessage(this.dataset.msg)" data-msg="Free entry in 2 a weekly comp win FA Cup final tkts 21st May 2005. Text FA to 87121">
+        "Free entry in 2 a weekly comp win FA Cup final tkts 21st May..."
+      </div>
+    </div>
+    <div>
+      <div class="demo-msg-label" style="color:var(--success)">🟢 Ham Examples</div>
+      <div class="demo-msg ham" onclick="tryMessage(this.dataset.msg)" data-msg="Hey! Are you coming for lunch today? I'm at the canteen.">
+        "Hey! Are you coming for lunch today? I'm at the canteen."
+      </div>
+      <br>
+      <div class="demo-msg ham" onclick="tryMessage(this.dataset.msg)" data-msg="Kal college hai kya? Mujhe nahi pata schedule">
+        "Kal college hai kya? Mujhe nahi pata schedule" <span class="badge badge-cyan" style="font-size:0.68rem">Hindi</span>
+      </div>
+      <br>
+      <div class="demo-msg ham" onclick="tryMessage(this.dataset.msg)" data-msg="Ok I will call you back after 5 minutes. Just finishing up a meeting.">
+        "Ok I will call you back after 5 minutes. Just finishing up a meeting."
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function tryMessage(msg) {
+    window.location.href = '/detect?prefill=' + encodeURIComponent(msg);
+  }
+</script>
+{% endblock %}

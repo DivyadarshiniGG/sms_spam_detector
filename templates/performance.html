@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+{% block title %}Performance — SpamShield AI{% endblock %}
+
+{% block extra_head %}
+<style>
+  .perf-container { max-width: 1100px; margin: 0 auto; padding: 48px 24px; }
+
+  .page-header { margin-bottom: 48px; }
+  .page-header h1 { font-size: 2rem; font-weight: 800; }
+  .page-header p { color: var(--text-2); margin-top: 8px; }
+
+  /* Model cards row */
+  .model-cards {
+    display              : grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap                  : 20px;
+    margin-bottom        : 40px;
+  }
+  .model-card {
+    background   : var(--bg-card);
+    border       : 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding      : 24px;
+    transition   : all 0.3s;
+  }
+  .model-card:hover {
+    border-color: var(--border-glow);
+    transform   : translateY(-3px);
+  }
+  .model-card-name {
+    font-family  : 'Syne', sans-serif;
+    font-size    : 1rem;
+    font-weight  : 700;
+    margin-bottom: 18px;
+    display      : flex;
+    align-items  : center;
+    gap          : 8px;
+  }
+  .metric-grid {
+    display              : grid;
+    grid-template-columns: 1fr 1fr;
+    gap                  : 12px;
+  }
+  .metric-box {
+    background   : rgba(255,255,255,0.04);
+    border-radius: 10px;
+    padding      : 12px;
+    text-align   : center;
+  }
+  .metric-val {
+    font-family : 'Syne', sans-serif;
+    font-size   : 1.4rem;
+    font-weight : 800;
+    display     : block;
+  }
+  .metric-name {
+    font-size : 0.7rem;
+    color     : var(--text-2);
+    margin-top: 2px;
+  }
+
+  .cv-row {
+    margin-top   : 14px;
+    padding-top  : 14px;
+    border-top   : 1px solid var(--border);
+    display      : flex;
+    justify-content: space-between;
+    font-size    : 0.8rem;
+    color        : var(--text-2);
+  }
+  .cv-val { color: var(--lime); font-weight: 600; }
+
+  /* Full comparison table */
+  .section-heading {
+    font-family  : 'Syne', sans-serif;
+    font-size    : 1.2rem;
+    font-weight  : 700;
+    margin-bottom: 20px;
+    display      : flex;
+    align-items  : center;
+    gap          : 10px;
+  }
+  .comparison-table {
+    width           : 100%;
+    border-collapse : separate;
+    border-spacing  : 0;
+    border-radius   : var(--radius-lg);
+    overflow        : hidden;
+    margin-bottom   : 40px;
+  }
+  .comparison-table th {
+    background  : rgba(255,255,255,0.06);
+    padding     : 14px 18px;
+    text-align  : center;
+    font-size   : 0.78rem;
+    font-weight : 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color       : var(--text-2);
+    border-bottom: 1px solid var(--border);
+  }
+  .comparison-table th:first-child { text-align: left; }
+  .comparison-table td {
+    padding    : 14px 18px;
+    text-align : center;
+    font-size  : 0.9rem;
+    border-bottom: 1px solid var(--border);
+    background : var(--bg-card);
+  }
+  .comparison-table td:first-child { text-align: left; font-weight: 600; }
+  .comparison-table tr:last-child td { border-bottom: none; }
+  .comparison-table tr:hover td { background: var(--bg-card2); }
+
+  .score-pill {
+    display      : inline-block;
+    padding      : 3px 10px;
+    border-radius: 20px;
+    font-weight  : 700;
+    font-size    : 0.85rem;
+  }
+  .score-top  { background: rgba(195,247,58,0.12); color: var(--lime); border: 1px solid rgba(195,247,58,0.25); }
+  .score-mid  { background: rgba(0,212,255,0.1);   color: var(--cyan); border: 1px solid rgba(0,212,255,0.2); }
+  .score-base { background: rgba(255,255,255,0.05); color: var(--text-1); }
+
+  /* Charts */
+  .charts-grid {
+    display              : grid;
+    grid-template-columns: 1fr;
+    gap                  : 24px;
+    margin-bottom        : 40px;
+  }
+  .chart-card {
+    background   : var(--bg-card);
+    border       : 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding      : 24px;
+    overflow     : hidden;
+  }
+  .chart-card img {
+    width        : 100%;
+    border-radius: var(--radius-md);
+  }
+
+  /* Why ML section */
+  .why-ml-grid {
+    display              : grid;
+    grid-template-columns : 1fr 1fr;
+    gap                  : 20px;
+    margin-bottom        : 40px;
+  }
+  .why-card {
+    background   : var(--bg-card);
+    border       : 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding      : 24px;
+  }
+  .why-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 14px; }
+  .why-point {
+    display      : flex;
+    align-items  : flex-start;
+    gap          : 10px;
+    margin-bottom: 10px;
+    font-size    : 0.87rem;
+    color        : var(--text-2);
+    line-height  : 1.55;
+  }
+  .why-dot { color: var(--cyan); font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+  @media (max-width: 768px) {
+    .model-cards  { grid-template-columns: 1fr; }
+    .why-ml-grid  { grid-template-columns: 1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="perf-container">
+  <div class="page-header">
+    <div class="badge badge-cyan" style="margin-bottom:14px">📊 Model Evaluation</div>
+    <h1>Performance Analysis</h1>
+    <p>Comparison of 3 ML models trained on 5,572 SMS messages — evaluated with 5-fold cross-validation.</p>
+  </div>
+
+  <!-- ── Model Score Cards ─────────────────────────────────── -->
+  {% set colors   = ['var(--cyan)', 'var(--pink)', 'var(--lime)'] %}
+  {% set icons    = ['🏃', '🎯', '📐'] %}
+  {% set model_list = results.keys() | list %}
+
+  <div class="model-cards">
+    {% for model_name, m in results.items() %}
+    <div class="model-card">
+      <div class="model-card-name">
+        <span>{{ icons[loop.index0] }}</span>
+        <span>{{ model_name }}</span>
+      </div>
+      <div class="metric-grid">
+        <div class="metric-box">
+          <span class="metric-val" style="color:var(--cyan)">{{ m.Accuracy }}%</span>
+          <div class="metric-name">Accuracy</div>
+        </div>
+        <div class="metric-box">
+          <span class="metric-val" style="color:var(--pink)">{{ m['F1-Score'] }}%</span>
+          <div class="metric-name">F1-Score</div>
+        </div>
+        <div class="metric-box">
+          <span class="metric-val" style="color:var(--lime)">{{ m.Precision }}%</span>
+          <div class="metric-name">Precision</div>
+        </div>
+        <div class="metric-box">
+          <span class="metric-val" style="color:var(--warning)">{{ m.Recall }}%</span>
+          <div class="metric-name">Recall</div>
+        </div>
+      </div>
+      <div class="cv-row">
+        <span>5-Fold CV F1</span>
+        <span class="cv-val">{{ m['CV-F1-Mean'] }}% ± {{ m['CV-F1-Std'] }}%</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- ── Full Comparison Table ─────────────────────────────── -->
+  <div class="section-heading"><i class="fa fa-table"></i> Full Metrics Table</div>
+  <table class="comparison-table">
+    <thead>
+      <tr>
+        <th>Model</th>
+        <th>Accuracy</th>
+        <th>Precision</th>
+        <th>Recall</th>
+        <th>F1-Score</th>
+        <th>ROC-AUC</th>
+        <th>CV F1</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for model_name, m in results.items() %}
+      <tr>
+        <td>{{ model_name }}</td>
+        <td><span class="score-pill score-mid">{{ m.Accuracy }}%</span></td>
+        <td><span class="score-pill score-base">{{ m.Precision }}%</span></td>
+        <td><span class="score-pill score-base">{{ m.Recall }}%</span></td>
+        <td><span class="score-pill score-top">{{ m['F1-Score'] }}%</span></td>
+        <td><span class="score-pill score-mid">{{ m['ROC-AUC'] }}%</span></td>
+        <td><span class="score-pill score-base">{{ m['CV-F1-Mean'] }}%</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- ── Charts ───────────────────────────────────────────── -->
+  <div class="section-heading"><i class="fa fa-chart-bar"></i> Visual Comparison</div>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div style="font-size:0.82rem;color:var(--text-2);margin-bottom:14px">
+        Performance across all 5 metrics — Naive Bayes, SVM, Logistic Regression
+      </div>
+      <img src="/static/comparison_chart.png" alt="Comparison chart">
+    </div>
+    <div class="chart-card">
+      <div style="font-size:0.82rem;color:var(--text-2);margin-bottom:14px">
+        Confusion matrices — actual vs predicted classifications
+      </div>
+      <img src="/static/confusion_matrices.png" alt="Confusion matrices">
+    </div>
+  </div>
+
+  <!-- ── Why ML Over DL ──────────────────────────────────── -->
+  <div class="section-heading"><i class="fa fa-scale-balanced"></i> Why ML — Not Deep Learning?</div>
+  <div class="why-ml-grid">
+    <div class="why-card">
+      <h3 style="color:var(--cyan)">✅ ML Advantages for SMS</h3>
+      <div class="why-point"><span class="why-dot">→</span><span>Dataset (5,572 msgs) is too small for deep neural networks to generalise properly</span></div>
+      <div class="why-point"><span class="why-dot">→</span><span>SMS text is short and structured — ideal for statistical ML models</span></div>
+      <div class="why-point"><span class="why-dot">→</span><span>ML gives <strong>interpretable coefficients</strong> — the backbone of our XAI explanation</span></div>
+      <div class="why-point"><span class="why-dot">→</span><span>Training time: seconds vs hours for transformer models</span></div>
+      <div class="why-point"><span class="why-dot">→</span><span>Achieves 98%+ accuracy — no performance gap with DL for this task</span></div>
+    </div>
+    <div class="why-card">
+      <h3 style="color:var(--pink)">⚠️ DL Limitations Here</h3>
+      <div class="why-point"><span class="why-dot">→</span><span>BERT/LSTM need 100,000+ samples; we have 5,572 — risk of overfitting</span></div>
+      <div class="why-point"><span class="why-dot">→</span><span>Deep Learning is a <em>black box</em> — cannot explain why a message is spam</span></div>
+      <div class="why-point"><span class="why-dot">→</span><span>Requires GPU infrastructure — not suitable for lightweight deployment</span></div>
+      <div class="why-point"><span class="why-dot">→</span><span>For SMS classification, DL adds complexity without meaningful accuracy gain</span></div>
+      <div class="why-point"><span class="why-dot">→</span><span>Our ML system already exceeds typical DL baselines on this dataset</span></div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
